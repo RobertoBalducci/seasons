@@ -1,30 +1,48 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import SeasonDisplay from './SeasonDisplay';
+import Spinner from  './Spinner';
+
 
 class App extends React.Component {
 
-    constructor(props) {
-        super(props);
+    state = {latitude: null, errorMessage: ""};
 
-        this.state = {latitude: null, errorMessage: ""};
-        window.navigator.geolocation.getCurrentPosition(
-            (position) => {
-                this.setState({latitude: position.coords.latitude});
-            },
-            (err) => {
-                this.setState({errorMessage: err.message});
-            }
-        );
+    componentDidMount() {
+
+        const successCallBack = (position) => {
+            this.setState({latitude: position.coords.latitude});
+        };
+        const errorCallBack = (error) => {
+            this.setState({errorMessage: error.message});
+        }
+        console.log('componentDidMount');
+        window.navigator.geolocation.getCurrentPosition(successCallBack, errorCallBack);
     }
+
+    componentDidUpdate() {
+        console.log('index componentDidUpdate');
+    }
+    componentWillUnmount() {
+        console.log('index componentWillUnmount');
+    }
+
+    componentDidCatch(error, errorInfo) {
+        console.log('index  componentDidCatch');
+        console.log(error, errorInfo);
+    }
+
     render () {
 
-        if (this.state.errorMessage && !this.state.latitude) {
-            return <div>Error: {this.state.errorMessage}</div>;
+        if (!this.state.latitude && !this.state.errorMessage) {
+            return <Spinner message={"Please accept location request"}/>;
         }
-        if (!this.state.errorMessage && this.state.latitude) {
-            return <div>Location: {this.state.latitude}<br /></div>;
+
+        if (!this.state.latitude && this.state.errorMessage) {
+            return <div>Error: {this.state.errorMessage}</div>
         }
-        return <div>Loading...<br /></div>;
+
+        return <SeasonDisplay latitude={this.state.latitude}/>;
     }
 }
 
